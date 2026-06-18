@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { Plus, Upload, Download, Search, Filter } from "lucide-react";
+import { Plus, Upload, Download, Search } from "lucide-react";
 import { mockComplaints, type Complaint } from "@/lib/mockData";
+import ComplaintDetailDrawer from "./ComplaintDetailDrawer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export default function AdminComplaintsPage() {
   const [page, setPage] = useState(1);
   const [showAdd, setShowAdd] = useState(false);
   const [showCsv, setShowCsv] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
 
   const filtered = useMemo(() => {
     return complaints.filter((c) => {
@@ -130,8 +132,13 @@ export default function AdminComplaintsPage() {
                     <td colSpan={10} className="text-center text-slate-500 py-10">No complaints match the current filters</td>
                   </tr>
                 ) : paginated.map((c) => (
-                  <tr key={c.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors" data-testid={`complaint-row-${c.id}`}>
-                    <td className="px-3 py-2.5 text-slate-400 font-mono">{c.id}</td>
+                  <tr
+                    key={c.id}
+                    onClick={() => setSelectedComplaint(c)}
+                    className="border-b border-slate-700/50 hover:bg-slate-700/40 transition-colors cursor-pointer"
+                    data-testid={`complaint-row-${c.id}`}
+                  >
+                    <td className="px-3 py-2.5 text-blue-400 font-mono hover:underline">{c.id}</td>
                     <td className="px-3 py-2.5 text-slate-300 whitespace-nowrap">{c.date}</td>
                     <td className="px-3 py-2.5 text-slate-300 whitespace-nowrap">{c.policeStation}</td>
                     <td className="px-3 py-2.5 text-slate-300">{c.locality}</td>
@@ -173,6 +180,9 @@ export default function AdminComplaintsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Complaint Detail Drawer */}
+      <ComplaintDetailDrawer complaint={selectedComplaint} onClose={() => setSelectedComplaint(null)} />
 
       {/* Add Complaint Modal */}
       <AddComplaintDialog open={showAdd} onClose={() => setShowAdd(false)} onAdd={(c) => setComplaints(prev => [c, ...prev])} />

@@ -4,6 +4,7 @@ import { mockStats, mockComplaints, mockAreas } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { StatCardSkeleton, TableSkeleton, ChartSkeleton } from "@/components/ui/SkeletonCard";
 
 function formatCurrency(n: number) {
   if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
@@ -27,24 +28,33 @@ const statCards = [
 const recent = mockComplaints.slice(0, 10);
 
 export default function AdminOverviewPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 900);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((s) => (
-          <Card key={s.label} className={`bg-slate-800 border ${s.border} shadow-sm`} data-testid={`stat-${s.label.toLowerCase().replace(/\s+/g, "-")}`}>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className={`h-9 w-9 ${s.bg} rounded-lg flex items-center justify-center`}>
-                  <s.icon className={`h-5 w-5 ${s.color}`} />
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          : statCards.map((s) => (
+            <Card key={s.label} className={`bg-slate-800 border ${s.border} shadow-sm`} data-testid={`stat-${s.label.toLowerCase().replace(/\s+/g, "-")}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className={`h-9 w-9 ${s.bg} rounded-lg flex items-center justify-center`}>
+                    <s.icon className={`h-5 w-5 ${s.color}`} />
+                  </div>
                 </div>
-              </div>
-              <p className="text-white text-2xl font-bold mt-3">{s.value}</p>
-              <p className="text-slate-400 text-xs mt-0.5">{s.label}</p>
-              <p className="text-slate-600 text-xs mt-2">{s.change}</p>
-            </CardContent>
-          </Card>
-        ))}
+                <p className="text-white text-2xl font-bold mt-3">{s.value}</p>
+                <p className="text-slate-400 text-xs mt-0.5">{s.label}</p>
+                <p className="text-slate-600 text-xs mt-2">{s.change}</p>
+              </CardContent>
+            </Card>
+          ))}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -54,15 +64,19 @@ export default function AdminOverviewPage() {
             <CardTitle className="text-slate-200 text-sm font-semibold">Last 7 Days — Complaint Volume</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={mockStats.last7Days} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="date" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#e2e8f0" }} cursor={{ fill: "#334155" }} />
-                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Complaints" />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <ChartSkeleton height={200} />
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={mockStats.last7Days} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px", color: "#e2e8f0" }} cursor={{ fill: "#334155" }} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Complaints" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -75,19 +89,33 @@ export default function AdminOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {mockAreas
-                .filter((a) => a.riskLevel === "High")
-                .map((area) => (
-                  <div key={area.id} className="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
-                    <div>
-                      <p className="text-slate-200 text-sm font-medium">{area.name}</p>
-                      <p className="text-slate-500 text-xs">{area.complaintCount} complaints</p>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between py-2">
+                    <div className="space-y-1.5">
+                      <div className="h-3 w-28 bg-slate-700/60 animate-pulse rounded" />
+                      <div className="h-2.5 w-16 bg-slate-700/60 animate-pulse rounded" />
                     </div>
-                    <Badge className={`${riskBadge(area.riskLevel)} text-xs border`}>{area.riskLevel}</Badge>
+                    <div className="h-5 w-14 bg-slate-700/60 animate-pulse rounded-full" />
                   </div>
                 ))}
-            </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {mockAreas
+                  .filter((a) => a.riskLevel === "High")
+                  .map((area) => (
+                    <div key={area.id} className="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+                      <div>
+                        <p className="text-slate-200 text-sm font-medium">{area.name}</p>
+                        <p className="text-slate-500 text-xs">{area.complaintCount} complaints</p>
+                      </div>
+                      <Badge className={`${riskBadge(area.riskLevel)} text-xs border`}>{area.riskLevel}</Badge>
+                    </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -98,31 +126,35 @@ export default function AdminOverviewPage() {
           <CardTitle className="text-slate-200 text-sm font-semibold">Recent Complaints</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm" data-testid="recent-complaints-table">
-              <thead>
-                <tr className="border-b border-slate-700">
-                  {["ID", "Date", "Locality", "Scam Type", "Amount", "Risk"].map((h) => (
-                    <th key={h} className="text-left text-xs text-slate-500 font-medium px-4 py-3">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((c) => (
-                  <tr key={c.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors" data-testid={`complaint-row-${c.id}`}>
-                    <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.id}</td>
-                    <td className="px-4 py-2.5 text-slate-300 text-xs">{c.date}</td>
-                    <td className="px-4 py-2.5 text-slate-300 text-xs">{c.locality}</td>
-                    <td className="px-4 py-2.5 text-slate-300 text-xs">{c.scamType}</td>
-                    <td className="px-4 py-2.5 text-slate-300 text-xs font-medium">{formatCurrency(c.amount)}</td>
-                    <td className="px-4 py-2.5">
-                      <Badge className={`${riskBadge(c.riskLevel)} text-xs border`}>{c.riskLevel}</Badge>
-                    </td>
+          {loading ? (
+            <TableSkeleton rows={8} cols={6} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm" data-testid="recent-complaints-table">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    {["ID", "Date", "Locality", "Scam Type", "Amount", "Risk"].map((h) => (
+                      <th key={h} className="text-left text-xs text-slate-500 font-medium px-4 py-3">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {recent.map((c) => (
+                    <tr key={c.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors" data-testid={`complaint-row-${c.id}`}>
+                      <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.id}</td>
+                      <td className="px-4 py-2.5 text-slate-300 text-xs">{c.date}</td>
+                      <td className="px-4 py-2.5 text-slate-300 text-xs">{c.locality}</td>
+                      <td className="px-4 py-2.5 text-slate-300 text-xs">{c.scamType}</td>
+                      <td className="px-4 py-2.5 text-slate-300 text-xs font-medium">{formatCurrency(c.amount)}</td>
+                      <td className="px-4 py-2.5">
+                        <Badge className={`${riskBadge(c.riskLevel)} text-xs border`}>{c.riskLevel}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

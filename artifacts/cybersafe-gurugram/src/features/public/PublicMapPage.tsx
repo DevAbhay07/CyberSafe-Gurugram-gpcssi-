@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "wouter";
 import { MapPin, AlertTriangle, TrendingUp, Shield, ChevronRight, Info } from "lucide-react";
 import { mockAreas, mockStats, type Area } from "@/lib/mockData";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const GURUGRAM_CENTER = { lat: 28.4595, lng: 77.0266 };
+import AreaDetailModal from "./AreaDetailModal";
 
 function formatCurrency(n: number) {
   if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)} Cr`;
@@ -33,7 +32,6 @@ function ScamMapFallback({ areas, selected, onSelect }: { areas: Area[]; selecte
         <div className="absolute top-4 left-4 text-slate-500 text-xs">
           Map view — Gurugram, Haryana (28.45°N 77.03°E)
         </div>
-        {/* Grid lines for map effect */}
         <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -95,6 +93,7 @@ function ScamMapFallback({ areas, selected, onSelect }: { areas: Area[]; selecte
 
 export default function PublicMapPage() {
   const [selected, setSelected] = useState<Area | null>(null);
+  const [modalArea, setModalArea] = useState<Area | null>(null);
   const topScamTypes = mockStats.scamTypeCounts.slice(0, 3).map((s) => s.type);
 
   return (
@@ -153,7 +152,7 @@ export default function PublicMapPage() {
             </CardContent>
           </Card>
 
-          {/* Selected area */}
+          {/* Selected area panel */}
           {selected ? (
             <Card className="bg-slate-800 border-slate-700" data-testid="area-details-panel">
               <CardHeader className="pb-2">
@@ -171,7 +170,7 @@ export default function PublicMapPage() {
                   <p className="text-slate-400 text-xs">{selected.policeStation}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className={`${riskBadge(selected.riskLevel)} text-xs`}>{selected.riskLevel} Risk</Badge>
+                  <Badge className={`${riskBadge(selected.riskLevel)} text-xs border`}>{selected.riskLevel} Risk</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-slate-700/50 rounded-lg p-2">
@@ -191,6 +190,13 @@ export default function PublicMapPage() {
                     ))}
                   </div>
                 </div>
+                <button
+                  onClick={() => setModalArea(selected)}
+                  className="w-full mt-1 py-2 text-xs text-blue-400 border border-blue-800 hover:bg-blue-900/30 rounded-lg transition-colors font-medium"
+                  data-testid="button-view-area-details"
+                >
+                  View Full Details &amp; Safety Tips
+                </button>
               </CardContent>
             </Card>
           ) : (
@@ -201,6 +207,31 @@ export default function PublicMapPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Area quick list */}
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-slate-400 uppercase tracking-wide">All Areas</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-48 overflow-y-auto">
+                {mockAreas.map((area) => (
+                  <button
+                    key={area.id}
+                    onClick={() => setSelected(area)}
+                    data-testid={`area-list-${area.id}`}
+                    className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 last:border-0 ${selected?.id === area.id ? "bg-slate-700/50" : ""}`}
+                  >
+                    <div>
+                      <p className="text-slate-200 text-xs font-medium">{area.name}</p>
+                      <p className="text-slate-500 text-xs">{area.complaintCount} complaints</p>
+                    </div>
+                    <Badge className={`${riskBadge(area.riskLevel)} text-xs border flex-shrink-0`}>{area.riskLevel}</Badge>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Awareness links */}
           <Card className="bg-blue-900/30 border-blue-700/40">
@@ -220,10 +251,20 @@ export default function PublicMapPage() {
                 </span>
                 <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-100" />
               </Link>
+              <Link href="/report" className="flex items-center justify-between text-blue-200 hover:text-white text-sm py-1 group">
+                <span className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-red-400" />
+                  Report a Crime
+                </span>
+                <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-100" />
+              </Link>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Area detail modal */}
+      <AreaDetailModal area={modalArea} onClose={() => setModalArea(null)} />
     </div>
   );
 }

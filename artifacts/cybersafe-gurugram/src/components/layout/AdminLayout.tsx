@@ -3,9 +3,11 @@ import {
   LayoutDashboard, Map, BarChart3, FileText, Settings, Users,
   Shield, LogOut, ChevronRight, Bell
 } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import AdminNotificationsPanel from "@/features/admin/notifications/AdminNotificationsPanel";
 
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -25,9 +27,12 @@ const pageTitles: Record<string, string> = {
   "/admin/users": "User Management",
 };
 
+const UNREAD_COUNT = 3;
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const [location] = useLocation();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   if (!isAuthenticated) return <Redirect to="/login" />;
   if (!isAdmin) return <Redirect to="/" />;
@@ -53,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             const Icon = item.icon;
             const active = item.exact
               ? location === item.href
-              : location.startsWith(item.href) && item.href !== "/admin";
+              : location.startsWith(item.href);
             const isOverview = item.exact && location === "/admin";
 
             return (
@@ -100,18 +105,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6">
+        <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 relative">
           <h1 className="text-white font-semibold text-lg">{pageTitle}</h1>
           <div className="flex items-center gap-3">
-            <button className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 relative" data-testid="button-notifications">
+            <button
+              onClick={() => setNotificationsOpen((o) => !o)}
+              className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 relative transition-colors"
+              data-testid="button-notifications"
+            >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-0.5 right-0.5 h-2 w-2 bg-red-500 rounded-full" />
+              {UNREAD_COUNT > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold">
+                  {UNREAD_COUNT}
+                </span>
+              )}
             </button>
             <div className="flex items-center gap-2 text-sm text-slate-300">
               <span className="text-slate-500">|</span>
               <span className="font-medium text-blue-400">Admin Console</span>
             </div>
           </div>
+
+          <AdminNotificationsPanel
+            open={notificationsOpen}
+            onClose={() => setNotificationsOpen(false)}
+          />
         </header>
 
         <main className="flex-1 overflow-auto bg-slate-950 p-6">
