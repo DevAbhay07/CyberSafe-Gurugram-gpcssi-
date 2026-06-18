@@ -1,0 +1,328 @@
+You are an expert React + TypeScript + Tailwind + Mapbox/MapLibre developer.
+
+Build a **full frontend** (no real backend yet) for a project called:
+
+  “CyberSafe Gurugram: Scam Hotspot Map & Complaint Intelligence Portal”
+
+This is NOT just a dashboard. It is a full website with:
+- Public-facing UI for citizens
+- Admin console for cyber police
+- Login/logout and role-based views
+- A 3D, Google Maps–style city map for scam hotspots
+
+=====================
+CORE REQUIREMENTS
+=====================
+
+Tech stack:
+- React + TypeScript
+- React Router for routing
+- Tailwind CSS for styling
+- 3D Map:
+  - Use Mapbox GL JS or MapLibre via react-map-gl (React friendly wrapper)
+  - 3D buildings & pitched camera (pitch & bearing) using fill-extrusion layers or a 3D terrain style
+- Charts: Recharts or Chart.js
+
+The app should run with:
+- npm install
+- npm run dev (or npm start)
+
+Authentication & Roles:
+- Simple login page:
+  - Email + password + “Login” button
+  - No real backend auth; use a fake auth context
+- Logic:
+  - If email contains “admin” → role = "admin"
+  - Else role = "public"
+- Store auth state + role in React context or a simple auth provider
+- Show “Logout” button in both public and admin layouts when logged in
+- Protect all `/admin/*` routes; redirect unauthenticated users to `/login`
+
+=====================
+ROUTING & LAYOUTS
+=====================
+
+Use React Router with two main layout shells:
+
+1) PublicLayout (for citizen-facing pages)
+   - Top navbar:
+     - Brand: “CyberSafe Gurugram”
+     - Nav links: Home, Map, Awareness, How to Report, Login/Logout
+   - Footer: link to 1930 helpline & national cyber crime portal (static links only)
+
+   Public routes:
+   - `/` (Home)
+   - `/map`
+   - `/awareness`
+   - `/how-to-report`
+   - `/login`
+
+2) AdminLayout (for police/admin)
+   - Left sidebar with nav links:
+     - Overview
+     - Map Intelligence
+     - Analytics
+     - Complaints
+     - Config
+     - Users (optional stub)
+   - Topbar with:
+     - Page title
+     - Current role (Admin)
+     - Logout button
+   - Routed under `/admin/*`
+
+   Admin routes:
+   - `/admin` → Overview
+   - `/admin/map` → Admin Map Intelligence
+   - `/admin/analytics` → Charts & trends
+   - `/admin/complaints` → table + forms
+   - `/admin/config` → risk thresholds, scam playbooks
+   - `/admin/users` → simple stub page (optional)
+
+=====================
+FOLDER STRUCTURE
+=====================
+
+Use this structure under `src/`:
+
+- `components/layout/`
+  - PublicLayout.tsx
+  - AdminLayout.tsx
+  - Sidebar.tsx
+  - Topbar.tsx
+- `components/ui/`
+  - Button.tsx
+  - Card.tsx
+  - StatCard.tsx
+  - DataTable.tsx
+  - Modal.tsx
+  - Tag.tsx
+  - LoadingSpinner.tsx
+- `features/auth/`
+  - LoginPage.tsx
+  - AuthProvider.tsx (context with role, login, logout)
+- `features/public/`
+  - HomePage.tsx
+  - PublicMapPage.tsx
+  - AwarenessPage.tsx
+  - HowToReportPage.tsx
+- `features/admin/overview/`
+  - AdminOverviewPage.tsx
+- `features/admin/map/`
+  - AdminMapPage.tsx
+  - MapLegend.tsx
+  - AreaDetailsPanel.tsx
+- `features/admin/analytics/`
+  - AdminAnalyticsPage.tsx
+  - TrendChart.tsx
+  - ScamTypeChart.tsx
+  - ChannelChart.tsx
+  - DemographicsChart.tsx
+- `features/admin/complaints/`
+  - AdminComplaintsPage.tsx
+  - ComplaintTable.tsx
+  - ComplaintForm.tsx
+  - CsvUploadDialog.tsx
+- `features/admin/config/`
+  - AdminConfigPage.tsx
+  - RiskThresholdForm.tsx
+  - ScamPlaybookForm.tsx
+- `features/admin/users/`
+  - AdminUsersPage.tsx (stub)
+- `lib/`
+  - api.ts        // fake API calls (mock)
+  - mockData.ts   // static mock data for complaints, areas, stats
+- `App.tsx`
+- `main.tsx` / `index.tsx` for entry
+
+=====================
+3D MAP REQUIREMENTS
+=====================
+
+Map library:
+- Use Mapbox GL JS or MapLibre via a React wrapper (react-map-gl or react-mapbox-gl)
+- Assume I will provide MAPBOX_ACCESS_TOKEN later; put it in a config constant
+
+PublicMapPage (route `/map`):
+- Full-width map view with:
+  - Initial view:
+    - Center on Gurugram coordinates
+    - Zoom ~ 13–15
+    - Pitch ~ 60 degrees
+    - Bearing ~ -30 degrees
+  - Style:
+    - Use a style with 3D buildings enabled (fill-extrusion) and nice city look
+- Overlay:
+  - Right side panel or bottom panel summarizing:
+    - “Current filters”
+    - Basic stats: total complaints (mock), top 3 scam types in city
+  - A simple legend showing color meaning (low → high complaint density)
+
+AdminMapPage (route `/admin/map`):
+- Same 3D base map, but with more controls:
+  - Filters toolbar:
+    - Date range (dropdown options + a simple date picker)
+    - Scam type dropdown (UPI, QR, task scam, sextortion, investment, job scam, fake KYC)
+    - Police Station / locality dropdown
+  - Layer for scam hotspots:
+    - Add markers or extruded polygons for 5–10 mock localities
+    - Color and height represent complaint_count or risk_score
+  - Interaction:
+    - Hover shows tooltip with locality name + complaints
+    - Click opens `AreaDetailsPanel`:
+      - Locality name, PS
+      - Complaint count
+      - Total loss
+      - Top scam types
+      - Risk level (Low/Medium/High)
+      - Short awareness text (“Common MO: fake job offers via WhatsApp…”)
+
+Code style:
+- Wrap map logic in a reusable `<CyberMap>` component to keep pages clean
+- Keep map config (center, zoom, pitch, bearing, style URL) in a config file
+
+=====================
+PUBLIC PAGES
+=====================
+
+`/` – HomePage:
+- Hero section explaining CyberSafe Gurugram in simple language
+- Key stats cards (from mock data): “X complaints”, “₹Y reported loss”, “Top scam: UPI fraud”
+- Button to “View Scam Map” (link to `/map`)
+
+`/map` – PublicMapPage:
+- 3D map as described above
+- Short, citizen-friendly text explaining what colors/markers mean
+- Link to “How to stay safe” and “How to report”
+
+`/awareness` – AwarenessPage:
+- Grid of cards, each for a scam type:
+  - UPI Fraud
+  - QR Code Scam
+  - Work-from-home/Task Fraud
+  - Sextortion
+  - Investment Scam
+  - etc.
+- Each card:
+  - Short description of MO (modus operandi)
+  - Red flags
+  - “Do this immediately” bullet list
+
+`/how-to-report` – HowToReportPage:
+- Step-by-step process:
+  1. Call 1930 helpline
+  2. Report on national cyber crime portal
+  3. Preserve evidence (screenshots, message logs, bank SMS)
+- Use a simple timeline UI
+- Include static buttons that link out (just href, no functionality) to external sites
+
+`/login` – LoginPage:
+- Centered card:
+  - Email, password (controlled inputs)
+  - “Login as Admin” hint: using admin email sets role admin
+- On successful login:
+  - If admin → redirect to `/admin`
+  - If public → redirect to `/`
+
+=====================
+ADMIN PAGES
+=====================
+
+`/admin` – AdminOverviewPage:
+- Use mock stats:
+  - Total complaints
+  - Total loss
+  - Average loss
+  - Number of high-risk localities
+- Recent activity table (a few latest complaints)
+- Small chart: last 7 days complaints trend
+
+`/admin/analytics` – AdminAnalyticsPage:
+- Stat cards at top
+- Trend chart:
+  - Complaints by month (mock 12-month data)
+- Bar chart:
+  - Complaints by scam type
+- Pie / bar:
+  - By channel (UPI, QR, card, social, OTP)
+  - By age group & gender
+- All fed from mockData.ts through lib/api.ts
+
+`/admin/complaints` – AdminComplaintsPage:
+- FilterBar:
+  - Scam type
+  - Police station/locality
+  - Date range
+- DataTable:
+  - columns: ID, date, PS, locality, scam type, channel, amount, age band, gender, risk level
+  - Pagination
+- Buttons:
+  - “Add Complaint” → opens modal with ComplaintForm
+  - “Upload CSV” → opens CsvUploadDialog (for now, just UI and demo of selecting a file)
+
+`/admin/config` – AdminConfigPage:
+- RiskThresholdForm:
+  - Numeric inputs for:
+    - highRiskComplaintCount
+    - highRiskLossAmount
+  - Save button (for now, just updates local state)
+- ScamPlaybookForm:
+  - Multi-select for scam types
+  - Textareas for “Short description”, “Red flags”, “Recommended steps”
+  - For now, read/write to mock state
+
+`/admin/users` – AdminUsersPage:
+- Simple stub:
+  - Table of a few mock users with role (Admin/Public)
+  - No editing needed for now
+
+=====================
+STATE & MOCK DATA
+=====================
+
+In `lib/mockData.ts`, define:
+- `areas`: array of locality/PS objects with:
+  - id, name, policeStation, center {lat, lng}, complaintCount, totalLoss, riskLevel, topScamTypes[]
+- `complaints`: array with:
+  - id, date, policeStation, locality, scamType, channel, amount, ageBand, gender, riskLevel
+- `stats`: overview metrics & monthly trend arrays
+- `playbooks`: small map keyed by scamType with text fields
+
+In `lib/api.ts`, create async functions like:
+- `login(email, password)` → resolves with { role: "admin" | "public" }
+- `getPublicOverview()` → returns summary stats
+- `getPublicMapData(filters)` → returns areas for public map
+- `getAdminOverview()` → stats for admin
+- `getAdminTrends(filters)` → trend arrays
+- `getAdminHeatmapData(filters)` → same areas, maybe with more fields
+- `getComplaints(filters)` → filtered complaints
+- `createComplaint(payload)` → adds to in-memory array
+- etc.
+
+All API functions should:
+- Return Promises
+- Use setTimeout to simulate network delay (200–500ms)
+
+=====================
+STYLING & UX
+=====================
+
+- Use Tailwind for layout and components
+- Public pages: slightly softer colors, more whitespace
+- Admin pages: tighter layout, typical dashboard feel
+- Map container should fill available height with a fixed panel height on smaller screens
+- Make sure everything is reasonably responsive (desktop first, but not broken on mobile)
+
+=====================
+DELIVERABLE
+=====================
+
+Deliver a working React + TS + Tailwind project with:
+
+- Routing + layouts as described
+- Auth stub with admin/public roles
+- Public site (home, map, awareness, how-to-report)
+- Admin console (overview, map, analytics, complaints, config, users)
+- 3D scam hotspot map using Mapbox/MapLibre with tilt & buildings
+- Charts & tables using mock data from lib/mockData.ts via lib/api.ts
+- Clean, modular code in the folder structure above
