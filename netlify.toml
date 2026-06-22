@@ -1,11 +1,11 @@
 [build]
   base    = "artifacts/cybersafe-gurugram"
-  command = "pnpm run build"
+  command = "pnpm install --no-frozen-lockfile && pnpm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
-  PNPM_VERSION = "9"
+  NODE_VERSION    = "20"
+  PNPM_VERSION    = "9.15.9"
 
 # SPA routing — redirect all paths to index.html so wouter handles them
 [[redirects]]
