@@ -1,0 +1,14 @@
+[build]
+  base    = "artifacts/cybersafe-gurugram"
+  command = "pnpm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PNPM_VERSION = "9"
+
+# SPA routing — redirect all paths to index.html so wouter handles them
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
