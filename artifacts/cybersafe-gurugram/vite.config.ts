@@ -8,7 +8,6 @@ import path from "path";
 // Locally, fall back to Vite's default (5173) and root path ("/").
 
 const port = Number(process.env.PORT ?? 5173);
-const basePath = process.env.BASE_PATH ?? "/";
 
 // ─── Replit-only plugins (only loaded when running inside Replit) ─────────────
 // These plugins are no-ops outside Replit — they only activate when REPL_ID
@@ -25,7 +24,7 @@ const replitPlugins =
     : [];
 
 export default defineConfig({
-  base: basePath,
+  base: "/",
   plugins: [react(), tailwindcss(), ...replitPlugins],
   resolve: {
     alias: {
@@ -41,7 +40,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
   },
   server: {
