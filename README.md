@@ -2,6 +2,11 @@
 
 **Scam Hotspot Map & Complaint Intelligence Portal**
 
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-cybersafe--gurugram.netlify.app-brightgreen?style=for-the-badge)](https://cybersafe-gurugram.netlify.app/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/cybersafe-gurugram/deploy-status)](https://cybersafe-gurugram.netlify.app/)
+
+> 🌐 **Live at:** [https://cybersafe-gurugram.netlify.app/](https://cybersafe-gurugram.netlify.app/)
+
 A full-featured civic intelligence SPA built for the **Gurugram Police Cybercrime Unit**. It gives citizens a live visual view of cyber-crime hotspots across Gurugram, lets them file and track complaints, and provides police analysts with an administrative dashboard for trend analysis and investigation management.
 
 ---
