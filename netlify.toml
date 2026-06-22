@@ -1,6 +1,6 @@
 [build]
   base    = "artifacts/cybersafe-gurugram"
-  command = "pnpm install --no-frozen-lockfile && pnpm run build"
+  command = "pnpm run build"
   publish = "dist"
 
 [build.environment]
