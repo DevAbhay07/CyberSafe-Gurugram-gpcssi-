@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/map", label: "Scam Map" },
   { href: "/awareness", label: "Awareness" },
   { href: "/how-to-report", label: "How to Report" },
+  { href: "/track", label: "Track Complaint" },
 ];
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -116,6 +117,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             >
               Report Crime
             </Link>
+            <Link
+              href="/track"
+              className="block px-3 py-2 rounded-md text-sm text-blue-600 font-medium hover:bg-blue-50"
+              onClick={() => setMobileOpen(false)}
+            >
+              Track Complaint
+            </Link>
             {isAuthenticated ? (
               <button
                 onClick={() => { logout(); setMobileOpen(false); }}
@@ -164,6 +172,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             >
               cybercrime.gov.in
             </a>
+            <Link href="/track" className="text-blue-400 hover:text-blue-300">
+              Track Complaint
+            </Link>
             <Link href="/report" className="text-red-400 hover:text-red-300" data-testid="footer-report-link">
               Report a Crime
             </Link>

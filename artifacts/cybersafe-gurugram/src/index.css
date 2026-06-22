@@ -288,3 +288,18 @@
     inset: -1px;
   }
 }
+
+/* ─── MapLibre GL popup overrides ────────────────────────────────────────── */
+/* Strip the default white background/border from MapLibre popups so our
+   custom dark-themed popup content (in CyberMap.tsx) shows cleanly.        */
+.maplibregl-popup-content,
+.cyber-map-popup .maplibregl-popup-content {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+.maplibregl-popup-tip {
+  display: none;
+}
+

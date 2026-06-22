@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { SearchX } from "lucide-react";
 import { Plus, Upload, Download, Search } from "lucide-react";
 import { mockComplaints, type Complaint } from "@/lib/mockData";
 import ComplaintDetailDrawer from "./ComplaintDetailDrawer";
@@ -129,7 +130,13 @@ export default function AdminComplaintsPage() {
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center text-slate-500 py-10">No complaints match the current filters</td>
+                    <td colSpan={10} className="py-14">
+                      <div className="flex flex-col items-center gap-2 text-slate-600">
+                        <SearchX className="h-8 w-8" />
+                        <p className="text-slate-400 text-sm font-medium">No complaints found</p>
+                        <p className="text-slate-600 text-xs">Try adjusting the filters or search term</p>
+                      </div>
+                    </td>
                   </tr>
                 ) : paginated.map((c) => (
                   <tr

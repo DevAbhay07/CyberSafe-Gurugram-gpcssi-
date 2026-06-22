@@ -2,54 +2,40 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const rawPort = process.env.PORT;
+// ─── Port & base path ─────────────────────────────────────────────────────────
+// On Replit, PORT and BASE_PATH are injected as env vars.
+// Locally, fall back to Vite's default (5173) and root path ("/").
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+const port = Number(process.env.PORT ?? 5173);
+const basePath = process.env.BASE_PATH ?? "/";
 
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+// ─── Replit-only plugins (only loaded when running inside Replit) ─────────────
+// These plugins are no-ops outside Replit — they only activate when REPL_ID
+// is set.  Safe to keep or remove; they are NOT installed by default any more.
+const replitPlugins =
+  process.env.NODE_ENV !== "production" &&
+  process.env.REPL_ID !== undefined
+    ? await Promise.all([
+        import("@replit/vite-plugin-cartographer").then((m) =>
+          m.cartographer({ root: path.resolve(import.meta.dirname, "..") })
+        ),
+        import("@replit/vite-plugin-dev-banner").then((m) => m.devBanner()),
+      ])
+    : [];
 
 export default defineConfig({
   base: basePath,
-  plugins: [
-    react(),
-    tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
-  ],
+  plugins: [react(), tailwindcss(), ...replitPlugins],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@assets": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "attached_assets"
+      ),
     },
     dedupe: ["react", "react-dom"],
   },
@@ -60,7 +46,8 @@ export default defineConfig({
   },
   server: {
     port,
-    strictPort: true,
+    // strictPort: false — allow Vite to pick next available port locally
+    strictPort: !!process.env.PORT,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {

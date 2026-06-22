@@ -10,6 +10,7 @@ import PublicMapPage from "@/features/public/PublicMapPage";
 import AwarenessPage from "@/features/public/AwarenessPage";
 import HowToReportPage from "@/features/public/HowToReportPage";
 import PublicReportPage from "@/features/public/PublicReportPage";
+import ComplaintTrackPage from "@/features/public/ComplaintTrackPage";
 import LoginPage from "@/features/auth/LoginPage";
 import AdminOverviewPage from "@/features/admin/overview/AdminOverviewPage";
 import AdminMapPage from "@/features/admin/map/AdminMapPage";
@@ -97,6 +98,13 @@ function App() {
               {() => (
                 <PublicLayout>
                   <PublicReportPage />
+                </PublicLayout>
+              )}
+            </Route>
+            <Route path="/track">
+              {() => (
+                <PublicLayout>
+                  <ComplaintTrackPage />
                 </PublicLayout>
               )}
             </Route>
